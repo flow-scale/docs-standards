@@ -7,7 +7,7 @@
 
 | Тип | Отвечает на вопрос | Где лежит в проекте | Шаблон |
 |---|---|---|---|
-| ADR, architecture decision record | почему система устроена так, а не иначе | `docs/architecture/decisions/` в lead-magnit, `docs/decisions/` в call-analysis-service | [adr-template.md](adr-template.md) |
+| ADR, architecture decision record | почему система устроена так, а не иначе | `docs/architecture/decisions/` | [adr-template.md](adr-template.md) |
 | REQ, карточка требования | что должно получиться для бизнеса и как проверить, что получилось | `docs/requirements/` | [requirement-template.md](requirement-template.md) |
 
 Требование ссылается на ADR, которыми его реализуют. ADR ссылается на требования, ради которых
@@ -109,8 +109,8 @@ node docs/standards/scripts/check-docs.mjs --dir docs/standards/examples/adr --n
 Скрипт запускается из корня проекта. По умолчанию проверяются `docs/architecture/decisions/` и
 `docs/requirements/`; проект с другими каталогами передаёт их через `--dir`. Файлы без фронтматтера
 до миграции дают предупреждение, не ошибку, поэтому CI остаётся зелёным. После миграции проект
-включает `--strict`. Проект ставит проверку в свою цепочку: `npm run check` в lead-magnit,
-`make check` в call-analysis-service.
+включает `--strict`. Проект ставит проверку в свою цепочку, в lead-magnit это `npm run check`.
+Сейчас стандарт применяется только в lead-magnit; остальные проекты подключаются отдельным решением.
 
 ## Подключение в проект
 
