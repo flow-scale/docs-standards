@@ -1,0 +1,30 @@
+{
+  "$comment": "Фрагмент для .claude/settings.json проекта. Аргументы после имени хука те же, что у check-docs.mjs в цепочке проверок проекта.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -f \"${CLAUDE_PROJECT_DIR}/docs/standards/hooks/claude/session-start.mjs\" ] || node \"${CLAUDE_PROJECT_DIR}/docs/standards/hooks/claude/session-start.mjs\" --strict",
+            "timeout": 15,
+            "statusMessage": "Стандарт документов"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "[ ! -f \"${CLAUDE_PROJECT_DIR}/docs/standards/hooks/claude/post-edit.mjs\" ] || node \"${CLAUDE_PROJECT_DIR}/docs/standards/hooks/claude/post-edit.mjs\" --strict",
+            "timeout": 15,
+            "statusMessage": "Проверка документов по стандарту"
+          }
+        ]
+      }
+    ]
+  }
+}

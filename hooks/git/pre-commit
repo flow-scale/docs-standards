@@ -1,0 +1,16 @@
+#!/bin/sh
+# Git-хук pre-commit: если в коммите есть ADR, карточки требований или контракты, проверяет их
+# по стандарту до коммита. Подключение в проекте, не затирая его собственные хуки:
+#   ln -s ../../docs/standards/hooks/git/pre-commit .git/hooks/pre-commit        # Linux, macOS
+#   cp docs/standards/hooks/git/pre-commit .git/hooks/pre-commit                 # Windows без symlink
+# Аргументы check-docs.mjs берутся из переменной DOCS_CHECK_ARGS (по умолчанию --strict).
+set -e
+root=$(git rev-parse --show-toplevel)
+cd "$root"
+[ -f docs/standards/scripts/check-docs.mjs ] || exit 0
+if git diff --cached --name-only --diff-filter=ACMR | grep -qE '^docs/(architecture/decisions|requirements|contracts)/.*\.md$'; then
+  node docs/standards/scripts/check-docs.mjs ${DOCS_CHECK_ARGS:---strict} || {
+    echo "Документы не прошли стандарт docs/standards/README.md. Коммит остановлен." >&2
+    exit 1
+  }
+fi

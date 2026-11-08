@@ -167,6 +167,19 @@ git submodule update --init          # у разработчика после cl
 submodule. Симлинк на соседнюю папку не используется: он требует `core.symlinks=true` и режима
 разработчика Windows, зависит от раскладки каталогов на диске и в CI указывает в пустоту.
 
+Проверка стоит в трёх местах, от раннего к позднему. Первые два ловят ошибку у автора, третье
+не пускает её в main.
+
+| Когда | Что | Как подключить |
+|---|---|---|
+| в сессии агента, сразу после правки документа | хук Claude Code `hooks/claude/post-edit.mjs`: запускает `check-docs.mjs` и возвращает ошибки агенту; `hooks/claude/session-start.mjs` напоминает о стандарте и сообщает, если документы уже расходятся или submodule пуст | фрагмент `hooks/claude/settings.example.json` в `.claude/settings.json` проекта. Аргументы после имени хука те же, что у проверки в цепочке проекта (`--strict`, `--enforced`, `--strict-coverage`, `--dir`) |
+| перед коммитом | git-хук `hooks/git/pre-commit`: проверяет документы, если они есть в коммите | `cp docs/standards/hooks/git/pre-commit .git/hooks/pre-commit` (на Linux и macOS можно симлинк). Хуки git в репозитории не живут, каждый разработчик ставит его сам или через `core.hooksPath` проекта |
+| в CI и в цепочке проверок проекта | `node docs/standards/scripts/check-docs.mjs --strict …` | шаг CI и команда вроде `npm run check:docs`; в lead-magnit это часть `npm run check` |
+
+Хуки Claude Code читают настройки проекта из `.claude/settings.json`, поэтому они одинаковы у всех,
+кто работает с репозиторием через Claude Code, и не требуют установки. Другие агенты (Codex, Cursor)
+хуков Claude Code не видят: для них остаются pre-commit и CI.
+
 ## Закрытые источники
 
 Папки вида `_private/` не считаются источником: они держат черновики вне git. Если в такой папке
