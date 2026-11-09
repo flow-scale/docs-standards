@@ -173,12 +173,26 @@ submodule. Симлинк на соседнюю папку не использу
 | Когда | Что | Как подключить |
 |---|---|---|
 | в сессии агента, сразу после правки документа | хук Claude Code `hooks/claude/post-edit.mjs`: запускает `check-docs.mjs` и возвращает ошибки агенту; `hooks/claude/session-start.mjs` напоминает о стандарте и сообщает, если документы уже расходятся или submodule пуст | фрагмент `hooks/claude/settings.example.json` в `.claude/settings.json` проекта. Аргументы после имени хука те же, что у проверки в цепочке проекта (`--strict`, `--enforced`, `--strict-coverage`, `--dir`) |
-| перед коммитом | git-хук `hooks/git/pre-commit`: проверяет документы, если они есть в коммите | `cp docs/standards/hooks/git/pre-commit .git/hooks/pre-commit` (на Linux и macOS можно симлинк). Хуки git в репозитории не живут, каждый разработчик ставит его сам или через `core.hooksPath` проекта |
+| перед коммитом | git-хук `hooks/git/pre-commit`: проверяет документы, если они есть в коммите | вызов из хука проекта, см. ниже; или напрямую `cp docs/standards/hooks/git/pre-commit .git/hooks/pre-commit` |
 | в CI и в цепочке проверок проекта | `node docs/standards/scripts/check-docs.mjs --strict …` | шаг CI и команда вроде `npm run check:docs`; в lead-magnit это часть `npm run check` |
 
 Хуки Claude Code читают настройки проекта из `.claude/settings.json`, поэтому они одинаковы у всех,
 кто работает с репозиторием через Claude Code, и не требуют установки. Другие агенты (Codex, Cursor)
-хуков Claude Code не видят: для них остаются pre-commit и CI.
+и правки руками хуков Claude Code не видят: для них остаются pre-commit и CI.
+
+Git-хук канона проверяет только документы: это общее для всех проектов. Проектные правила (схемы,
+ADR при изменении кода) живут в хуках самого проекта. Рекомендуемая схема: каталог `.githooks/` в
+проекте, его `pre-commit` сначала вызывает общий хук, затем своё; аргументы передаются переменной
+`DOCS_CHECK_ARGS` и совпадают с проверкой в цепочке проекта:
+
+```sh
+DOCS_CHECK_ARGS="--strict --enforced tests/contract" sh docs/standards/hooks/git/pre-commit
+```
+
+Включается один раз на клон командой `git config core.hooksPath .githooks`; проект обычно вызывает её из
+установки зависимостей, чтобы у каждого хуки появлялись сами. Хук git обходится `--no-verify`, поэтому
+барьером остаётся CI; хук нужен, чтобы ошибка была видна автору до пуша. Образец: lead-magnit, раздел
+«Git-хуки» в его README.
 
 ## Закрытые источники
 
